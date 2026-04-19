@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="File a community report on Smart Civic Portal.">
+  <title>Report Issue | Smart Civic Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body style="background: #f8fafc;">
+  <!-- Top Navigation -->
+  <nav class="navbar" style="background: white; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+    <a href="/" class="nav-brand">
+      <div class="brand-title">
+        <i class="ph-fill ph-map-pin" style="color: #2563eb;"></i>
+        <span>Smart Civic Portal</span>
+      </div>
+      <span class="brand-subtitle">Empowering Citizens, Building Communities</span>
+    </a>
+    
+    <div class="nav-actions">
+      <div id="navUser">
+        <!-- User profile injected by auth.js -->
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="max-width: 1000px; margin: 0 auto; padding: 4rem 1rem;">
+    <div style="margin-bottom: 3rem;" class="animate-fade-up">
+      <a href="/" style="color: var(--primary); text-decoration: none; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem; transition: transform 0.2s;" class="back-link">
+        <i class="ph-bold ph-arrow-left"></i> Back to Dashboard
+      </a>
+      <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;">Report a Community Issue</h1>
+      <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin-top: 8px;">Help keep our community safe and clean. Please provide as much detail as possible for faster resolution.</p>
+    </div>
+
+    <div id="errorAlert" class="toast toast-error" style="margin-bottom: 2rem; position: static; width: 100%; transform: none; display: none;">
+      <i class="ph ph-warning-circle"></i>
+      <span id="errorMessage"></span>
+    </div>
+
+    <form id="createForm" style="background: white; padding: 3rem; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);" class="animate-fade-up" style="animation-delay: 0.1s">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+        
+        <!-- Left Col -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Issue Title</label>
+            <input type="text" id="title" placeholder="e.g., Pothole on Main Road" required style="padding: 14px; border-radius: 12px; border: 1.5px solid #e2e8f0; font-size: 1rem; transition: border-color 0.2s;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Category</label>
+            <div style="position: relative;">
+              <select id="category" style="appearance: none; width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: white; font-size: 1rem; cursor: pointer;">
+                <option value="Colleges">Colleges</option>
+                <option value="Schools">Schools</option>
+                <option value="Societies">Societies</option>
+                <option value="Local Vendors">Local Vendors</option>
+                <option value="Shopkeepers">Shopkeepers</option>
+                <option value="Government Services">Government Services</option>
+              </select>
+              <i class="ph ph-caret-down" style="position: absolute; right: 16px; top: 18px; pointer-events: none; color: var(--text-secondary);"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Priority Level</label>
+            <input type="hidden" id="priority" value="Medium">
+            <div class="priority-selector" style="display: flex; gap: 10px;">
+              <button type="button" class="priority-option p-low" onclick="selectPriority('Low')" style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Low</button>
+              <button type="button" class="priority-option p-medium selected" onclick="selectPriority('Medium')" style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Medium</button>
+              <button type="button" class="priority-option p-high" onclick="selectPriority('High')" style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: white; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">High</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Evidence URL (Image Link)</label>
+            <div style="position: relative;">
+              <i class="ph ph-image" style="position: absolute; left: 14px; top: 16px; color: var(--text-secondary);"></i>
+              <input type="text" id="image" placeholder="https://example.com/photo.jpg" style="padding: 14px; padding-left: 44px; border-radius: 12px; border: 1.5px solid #e2e8f0; width: 100%;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Col -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Exact Location</label>
+            <div style="position: relative;">
+              <i class="ph ph-map-pin" style="position: absolute; left: 14px; top: 16px; color: var(--text-secondary);"></i>
+              <input type="text" id="location" placeholder="e.g., Sector 4, near Central Bank" required style="padding: 14px; padding-left: 44px; border-radius: 12px; border: 1.5px solid #e2e8f0; width: 100%;">
+            </div>
+          </div>
+
+          <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+            <label class="form-label" style="font-weight: 700; color: var(--text-main);">Detailed Description</label>
+            <textarea id="description" placeholder="Provide context about the issue, impact on citizens, and any other helpful details..." required style="flex: 1; min-height: 220px; padding: 16px; border-radius: 16px; border: 1.5px solid #e2e8f0; line-height: 1.6; resize: none; font-size: 1rem;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; align-items: center; gap: 2rem;">
+        <span style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">Your report will be reviewed by department heads.</span>
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="padding: 16px 48px; background: var(--primary); font-weight: 800; font-size: 1.05rem; border-radius: 14px; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); display: flex; align-items: center; gap: 10px;">
+          <span>Submit Portal Report</span>
+          <i class="ph-bold ph-paper-plane-tilt"></i>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <footer style="text-align: center; padding: 4rem 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+    <p>&copy; 2026 Smart Civic Portal. Official Government Communication Channel.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/create.js"></script>
+  <script>
+    function selectPriority(level) {
+      document.getElementById('priority').value = level;
+      const options = document.querySelectorAll('.priority-option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      const searchMap = { Low: '.p-low', Medium: '.p-medium', High: '.p-high' };
+      document.querySelector(searchMap[level]).classList.add('selected');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in to Smart Civic Portal to report and track community issues.">
+  <title>User Portal | Smart Civic Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-30px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
+</head>
+<body style="background: white; overflow: hidden;">
+  <div style="display: flex; min-height: 100vh;">
+    <!-- Left: Branding (Full Height Split) -->
+    <div class="mesh-bg" style="flex: 1.25; display: flex; flex-direction: column; justify-content: center; padding: 6rem; color: white; position: relative;">
+      
+      <!-- Decorative Floating Icons -->
+      <i class="ph ph-buildings floating" style="position: absolute; top: 15%; right: 15%; font-size: 8rem; opacity: 0.1; animation-delay: 0s;"></i>
+      <i class="ph ph-heart floating" style="position: absolute; bottom: 25%; left: 10%; font-size: 5rem; opacity: 0.08; animation-delay: 2s;"></i>
+
+      <div style="margin-bottom: 2.5rem; z-index: 10;" class="animate-fade-up">
+        <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+          <i class="ph-fill ph-map-pin" style="font-size: 3rem; color: white;"></i>
+        </div>
+      </div>
+      
+      <h1 style="font-size: 4.5rem; font-weight: 900; line-height: 1; margin-bottom: 1.5rem; z-index: 10; letter-spacing: -0.04em;" class="animate-fade-up">Civic power <br><span style="color: rgba(255,255,255,0.5);">in your hands.</span></h1>
+      <p style="font-size: 1.4rem; opacity: 0.8; max-width: 500px; z-index: 10; line-height: 1.6; font-weight: 500;" class="animate-fade-up">Join thousands of citizens making their community better through real-time reporting and tracking.</p>
+      
+      <div style="margin-top: 5rem; display: flex; gap: 4rem; z-index: 10;" class="animate-fade-up">
+        <div><div style="font-size: 2.5rem; font-weight: 900;">12k+</div><div style="font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em;">Reports Fixed</div></div>
+        <div><div style="font-size: 2.5rem; font-weight: 900;">2h</div><div style="font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em;">Avg. Response</div></div>
+      </div>
+    </div>
+
+    <!-- Right: Auth Form (Desktop Wide) -->
+    <div style="flex: 0.75; display: flex; flex-direction: column; justify-content: center; padding: 6rem; background: var(--bg-card); position: relative; border-left: 1px solid var(--border-color); transition: var(--transition-theme);">
+      <div style="position: absolute; top: 2rem; right: 2rem; display: flex; gap: 1rem; align-items: center;">
+        <button onclick="theme.toggle()" class="theme-toggle-btn" aria-label="Toggle Theme" style="background: var(--bg-body); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-secondary); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="ph ph-moon"></i></button>
+        <a href="/admin-login.html" class="btn" style="color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; background: var(--bg-body); padding: 8px 16px; border-radius: 10px; font-weight: 700; border: 1px solid var(--border-color); transition: all 0.2s;">
+          <i class="ph-bold ph-shield-check"></i> Admin Portal
+        </a>
+      </div>
+
+      <div style="margin-bottom: 3rem;">
+        <h2 style="font-size: 2.25rem; font-weight: 900; color: var(--text-main); letter-spacing: -0.02em;" id="authTitle">Sign in</h2>
+        <p style="color: var(--text-secondary); font-size: 1.05rem; margin-top: 6px;" id="authSubtitle">Welcome back! Please enter your details.</p>
+      </div>
+
+      <div id="errorAlert" class="toast toast-error" style="margin-bottom: 2rem; position: static; width: 100%; transform: none; display: none;">
+        <i class="ph ph-warning-circle"></i>
+        <span id="errorMessage"></span>
+      </div>
+
+      <form id="authForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div id="nameField" class="form-group" style="display: none;">
+          <label class="form-label" style="font-weight: 700;">Full Name</label>
+          <div style="position: relative;">
+            <i class="ph ph-user" style="position: absolute; left: 14px; top: 14px; color: var(--text-secondary);"></i>
+            <input type="text" id="name" class="input-glow" placeholder="Jane Doe" style="padding-left: 44px; border-radius: 12px; padding-top: 14px; padding-bottom: 14px; border-width: 1.5px;">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700;">Email Address</label>
+          <div style="position: relative;">
+            <i class="ph ph-envelope-simple" style="position: absolute; left: 14px; top: 14px; color: var(--text-secondary);"></i>
+            <input type="email" id="email" class="input-glow" placeholder="jane@example.com" required style="padding-left: 44px; border-radius: 12px; padding-top: 14px; padding-bottom: 14px; border-width: 1.5px;">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label class="form-label" style="margin-bottom: 0; font-weight: 700;">Password</label>
+            <a href="#" style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-decoration: none;">Forgot password?</a>
+          </div>
+          <div style="position: relative;">
+            <i class="ph ph-lock-key" style="position: absolute; left: 14px; top: 14px; color: var(--text-secondary);"></i>
+            <input type="password" id="password" class="input-glow" placeholder="••••••••" required style="padding-left: 44px; padding-right: 48px; border-radius: 12px; padding-top: 14px; padding-bottom: 14px; border-width: 1.5px;">
+            <button type="button" id="togglePassword" style="position: absolute; right: 14px; top: 14px; background: none; border: none; cursor: pointer; color: var(--text-secondary);">
+              <i class="ph ph-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: -0.5rem;">
+          <input type="checkbox" id="rememberMe" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary);">
+          <label for="rememberMe" style="font-size: 0.9rem; color: var(--text-secondary); cursor: pointer; user-select: none; font-weight: 500;">Keep me signed in</label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; padding: 16px; margin-top: 0.5rem; background: var(--primary); font-weight: 800; font-size: 1rem; border-radius: 14px; box-shadow: 0 10px 20px hsla(var(--p-h), var(--p-s), var(--p-l), 0.3); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s;">
+          <span id="submitText">Enter Dashboard</span>
+          <i class="ph ph-arrow-right" id="submitIcon"></i>
+        </button>
+      </form>
+
+      <div style="margin-top: 3rem; text-align: center; color: var(--text-secondary); font-size: 0.95rem;">
+        <span id="toggleText">Not a member yet? </span>
+        <button type="button" id="toggleBtn" style="background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 800; font-size: 0.95rem;">
+          Create an account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    if (auth.isAuthenticated()) window.location.href = '/';
+
+    let isLogin = true;
+    const authForm = document.getElementById('authForm');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const nameField = document.getElementById('nameField');
+    const authTitle = document.getElementById('authTitle');
+    const authSubtitle = document.getElementById('authSubtitle');
+    const toggleText = document.getElementById('toggleText');
+    const submitText = document.getElementById('submitText');
+    const nameInput = document.getElementById('name');
+    const errorAlert = document.getElementById('errorAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    const submitBtn = document.getElementById('submitBtn');
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      eyeIcon.classList.toggle('ph-eye');
+      eyeIcon.classList.toggle('ph-eye-slash');
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isLogin = !isLogin;
+      if (isLogin) {
+        authTitle.textContent = 'Sign in';
+        authSubtitle.textContent = 'Welcome back! Please enter your details.';
+        nameField.style.display = 'none';
+        nameInput.required = false;
+        toggleText.textContent = "Not a member yet? ";
+        toggleBtn.textContent = 'Create an account';
+        submitText.textContent = 'Enter Dashboard';
+      } else {
+        authTitle.textContent = 'Join Community';
+        authSubtitle.textContent = 'Start making your community better today.';
+        nameField.style.display = 'block';
+        nameInput.required = true;
+        toggleText.textContent = "Already have an account? ";
+        toggleBtn.textContent = 'Sign in now';
+        submitText.textContent = 'Create My Account';
+      }
+      errorAlert.style.display = 'none';
+    });
+
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const name = nameInput.value;
+      errorAlert.style.display = 'none';
+      
+      submitBtn.disabled = true;
+      const originalText = submitText.textContent;
+      submitText.textContent = 'Connecting...';
+
+      try {
+        if (isLogin) {
+          await auth.login(email, password, 'user');
+        } else {
+          await auth.register(name, email, password);
+        }
+        window.location.href = '/';
+      } catch (err) {
+        errorMessage.textContent = err.message || 'Authentication failed.';
+        errorAlert.style.display = 'flex';
+        errorAlert.classList.add('show');
+      } finally {
+        submitBtn.disabled = false;
+        submitText.textContent = originalText;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Administrative access to Smart Civic Portal.">
+  <title>Admin Portal | Smart Civic Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    .admin-mesh {
+      background-color: #0f172a;
+      background-image: radial-gradient(at 0% 0%, hsla(221,83%,53%,0.15) 0, transparent 50%), 
+                        radial-gradient(at 50% 0%, hsla(339,81%,60%,0.1) 0, transparent 50%);
+      position: relative;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body style="background: white; overflow: hidden;">
+  <div style="display: flex; min-height: 100vh;">
+    <!-- Left: Branding (Full Height Split) -->
+    <div class="admin-mesh" style="flex: 1.2; display: flex; flex-direction: column; justify-content: center; padding: 6rem; color: white;">
+      <div style="margin-bottom: 2.5rem; z-index: 10;" class="animate-fade-up">
+        <div style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+          <i class="ph-fill ph-shield-check" style="font-size: 3rem; color: #f43f5e;"></i>
+        </div>
+      </div>
+      <h1 style="font-size: 4.5rem; font-weight: 900; line-height: 1; margin-bottom: 1.5rem; z-index: 10; letter-spacing: -0.04em;" class="animate-fade-up">Official <br><span style="color: rgba(255,255,255,0.5);">Oversight.</span></h1>
+      <p style="font-size: 1.35rem; opacity: 0.8; max-width: 500px; z-index: 10; line-height: 1.6;" class="animate-fade-up">Review reports, manage departmental responses, and drive community resolution from one central command board.</p>
+      
+      <div style="margin-top: 5rem; z-index: 10;" class="animate-fade-up">
+        <div style="display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.4); font-size: 0.95rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em;">
+          <span style="width: 48px; height: 2px; background: #f43f5e;"></span>
+          Authorized Personnel Only
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Auth Form (Desktop Wide) -->
+    <div style="flex: 0.8; display: flex; flex-direction: column; justify-content: center; padding: 6rem; background: var(--bg-card); border-left: 1px solid var(--border-color); position: relative; transition: var(--transition-theme);">
+      <div style="position: absolute; top: 2rem; right: 2rem;">
+        <button onclick="theme.toggle()" class="theme-toggle-btn" aria-label="Toggle Theme" style="background: var(--bg-body); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-secondary); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="ph ph-moon"></i></button>
+      </div>
+      <div style="margin-bottom: 3.5rem;" class="animate-fade-up">
+        <h2 style="font-size: 3rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em;">Admin Sign-in</h2>
+        <p style="color: var(--text-secondary); font-size: 1.25rem; margin-top: 10px;">Please authenticate to access the oversight system.</p>
+      </div>
+
+      <div id="errorAlert" class="toast toast-error" style="margin-bottom: 2.5rem; position: static; width: 100%; transform: none; display: none;">
+        <i class="ph ph-warning-circle"></i>
+        <span id="errorMessage"></span>
+      </div>
+
+      <form id="adminAuthForm" style="display: flex; flex-direction: column; gap: 2rem;" class="animate-fade-up">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 800; font-size: 1rem;">Official Identifier</label>
+          <div style="position: relative;">
+            <i class="ph ph-envelope-simple" style="position: absolute; left: 16px; top: 16px; color: var(--text-secondary);"></i>
+            <input type="email" id="email" class="input-glow" placeholder="approver@department.gov" required style="padding-left: 48px; border-radius: 14px; padding-top: 16px; padding-bottom: 16px; background: #f8fafc; font-size: 1.1rem; border: 1.5px solid #e2e8f0; width: 100%;">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 800; font-size: 1rem;">Security Key</label>
+          <div style="position: relative;">
+            <i class="ph ph-lock-key" style="position: absolute; left: 16px; top: 16px; color: var(--text-secondary);"></i>
+            <input type="password" id="password" class="input-glow" placeholder="••••••••" required style="padding-left: 48px; border-radius: 14px; padding-top: 16px; padding-bottom: 16px; background: #f8fafc; font-size: 1.1rem; border: 1.5px solid #e2e8f0; width: 100%;">
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; padding: 18px; margin-top: 1.5rem; background: #0f172a; color: white; border: none; border-radius: 16px; font-weight: 800; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2); cursor: pointer;">
+          <span>Unlock Dashboard</span>
+          <i class="ph-bold ph-shield-check" style="font-size: 1.4rem;"></i>
+        </button>
+      </form>
+
+      <div style="margin-top: 5rem; text-align: center; border-top: 1.5px solid #f1f5f9; padding-top: 3rem;" class="animate-fade-up">
+        <a href="/login.html" style="color: var(--text-secondary); text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700;">
+          <i class="ph ph-arrow-left"></i> Return to Citizen Portal
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    if (auth.isAuthenticated()) window.location.href = '/';
+    const authForm = document.getElementById('adminAuthForm');
+    const errorAlert = document.getElementById('errorAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    const submitBtn = document.getElementById('submitBtn');
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorAlert.style.display = 'none';
+      submitBtn.disabled = true;
+      const original = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span>Verifying Access...</span>';
+      try {
+        await auth.login(email, password, 'admin');
+        window.location.href = '/';
+      } catch (err) {
+        errorMessage.textContent = err.message || 'Access denied.';
+        errorAlert.style.display = 'flex';
+        errorAlert.classList.add('show');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = original;
+      }
+    });
+  </script>
+</body>
+</html>
