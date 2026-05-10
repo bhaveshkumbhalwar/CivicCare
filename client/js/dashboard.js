@@ -217,7 +217,8 @@ function renderComplaints() {
               <span style="display: flex; align-items: center; gap: 6px; color: ${c.status === 'Pending' ? '#f43f5e' : '#10b981'};">
                 <i class="ph-bold ph-hourglass-high"></i> 
                 <b>${c.status === 'Pending' ? 'Awaiting Action' : (() => {
-                  const hours = Math.max(1, Math.round((new Date(c.updatedAt) - new Date(c.createdAt)) / 3600000));
+                  const end = c.firstRespondedAt ? new Date(c.firstRespondedAt) : new Date(c.updatedAt);
+                  const hours = Math.max(1, Math.round((end - new Date(c.createdAt)) / 3600000));
                   return hours > 24 ? `${Math.floor(hours/24)}d response` : `${hours}h response`;
                 })()}</b>
               </span>
@@ -400,3 +401,90 @@ window.loadMore = loadMore;
 window.toggleCategoryFilter = toggleCategoryFilter;
 window.fetchComplaints = fetchComplaints;
 window.sendReminder = sendReminder;
+
+// ─── Notification System ───────────────────────────────────────────────────────
+const notifBtn = document.getElementById('notifBtn');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifWrapper = document.getElementById('notifWrapper');
+const notifList = document.getElementById('notifList');
+const notifBadge = document.getElementById('notifBadge');
+const notifCountLabel = document.getElementById('notifCountLabel');
+
+if (notifBtn) {
+  notifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.style.display = notifDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+  
+  document.addEventListener('click', () => {
+    notifDropdown.style.display = 'none';
+  });
+}
+
+function updateNotifications() {
+  if (!currentUser || currentUser.role === 'user') {
+    if (notifWrapper) notifWrapper.style.display = 'none';
+    return;
+  }
+  
+  if (notifWrapper) notifWrapper.style.display = 'block';
+  
+  const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+  
+  const alerts = complaintsList.filter(c => 
+    (c.status === 'Pending') || 
+    (c.lastRemindedAt && (new Date() - new Date(c.lastRemindedAt) < 7 * 24 * 60 * 60 * 1000))
+  );
+  
+  const unreadAlerts = alerts.filter(a => !readNotifs.includes(a._id));
+  const count = unreadAlerts.length;
+  
+  if (notifBadge) {
+    notifBadge.textContent = count;
+    notifBadge.style.display = count > 0 ? 'block' : 'none';
+  }
+  if (notifCountLabel) notifCountLabel.textContent = `${count} New Alert${count !== 1 ? 's' : ''}`;
+  
+  if (alerts.length === 0) {
+    notifList.innerHTML = `
+      <div style="padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+        <i class="ph ph-envelope-open" style="font-size: 2rem; display: block; margin-bottom: 10px; opacity: 0.5;"></i>
+        All clear! No pending alerts.
+      </div>`;
+    return;
+  }
+  
+  notifList.innerHTML = alerts.map(c => {
+    const isRead = readNotifs.includes(c._id);
+    return `
+      <div class="notif-item ${isRead ? '' : 'unread'}" onclick="handleNotifClick('${c._id}')">
+        <div class="notif-icon" style="background: ${c.lastRemindedAt ? '#fff1f2' : '#f0f9ff'}; color: ${c.lastRemindedAt ? '#e11d48' : '#0ea5e9'};">
+          <i class="ph-fill ${c.lastRemindedAt ? 'ph-warning-circle' : 'ph-plus-circle'}"></i>
+          ${!isRead ? '<span style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; background: #f43f5e; border-radius: 50%; border: 2px solid var(--bg-card);"></span>' : ''}
+        </div>
+        <div class="notif-content">
+          <h4 style="color: var(--text-main);">${c.lastRemindedAt ? 'Urgent Reminder' : 'New Complaint'}</h4>
+          <p>${c.title.substring(0, 40)}${c.title.length > 40 ? '...' : ''}</p>
+          <span class="time" style="color: var(--text-secondary);">${new Date(c.createdAt).toLocaleDateString()}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.handleNotifClick = (id) => {
+  const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+  if (!readNotifs.includes(id)) {
+    readNotifs.push(id);
+    localStorage.setItem('readNotifs', JSON.stringify(readNotifs));
+  }
+  updateNotifications();
+  openDetails(id);
+};
+
+// Call updateNotifications after rendering UI
+const originalRenderUI = renderDashboardUI;
+renderDashboardUI = (append) => {
+  originalRenderUI(append);
+  updateNotifications();
+};

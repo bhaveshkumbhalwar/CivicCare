@@ -35,6 +35,11 @@ const updateComplaintStatus = async (req, res) => {
             complaint.resolvedAt = Date.now();
         }
 
+        // Set first response time if moving away from Pending for the first time
+        if (oldStatus === 'Pending' && status !== 'Pending' && !complaint.firstRespondedAt) {
+            complaint.firstRespondedAt = Date.now();
+        }
+
         await complaint.save();
         await complaint.populate('submittedBy', 'name email');
 

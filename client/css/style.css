@@ -88,20 +88,61 @@ body {
   transition: var(--transition-theme);
 }
 
+
+
 .nav-brand {
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  color: inherit;
+  color: var(--text-main);
 }
 
 .brand-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-main);
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Notifications */
+.notif-item {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+}
+.notif-item:hover {
+  background: var(--bg-muted);
+}
+.notif-item.unread {
+  background: hsla(var(--p-h), var(--p-s), var(--p-l), 0.05);
+}
+.notif-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.notif-content h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.notif-content p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.notif-content .time {
+  font-size: 0.7rem;
+  margin-top: 6px;
+  display: block;
 }
 
 .brand-subtitle {
