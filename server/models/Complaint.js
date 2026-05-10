@@ -63,6 +63,9 @@ const complaintSchema = new mongoose.Schema(
         resolvedAt: {
             type: Date,
         },
+        lastRemindedAt: {
+            type: Date,
+        },
     },
     { timestamps: true }
 );

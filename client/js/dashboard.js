@@ -99,9 +99,14 @@ async function fetchComplaints(append = false) {
   }
 }
 
-function sendReminder(category) {
-  showToast(`Reminder sent to the <b>${category}</b> Department!`, 'success');
-  // Logic for persistent notification can be added here
+async function sendReminder(id) {
+  try {
+    const res = await api.patch(`/complaints/${id}/remind`);
+    showToast(res.message, 'success');
+    fetchComplaints(); // Refresh to update button state
+  } catch (err) {
+    showToast(err.response?.data?.message || 'Failed to send reminder', 'error');
+  }
 }
 
 function renderDashboardUI(append = false) {
@@ -220,13 +225,25 @@ function renderComplaints() {
           </div>
         ` : ''}
 
+        ${(currentUser?.role?.startsWith('admin_') && c.lastRemindedAt) ? `
+          <div style="margin-bottom: 12px; padding: 8px 12px; background: #fff1f2; color: #e11d48; border-radius: 8px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 8px; border: 1px solid #fecdd3;">
+            <i class="ph-fill ph-warning-circle"></i> URGENT: REMINDER FROM SUPER ADMIN
+          </div>
+        ` : ''}
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
           <button onclick="handleUpvote('${c._id}')" class="btn" style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; color: var(--text-main);">
             <i class="ph ph-thumbs-up"></i> ${c.upvotes?.length || 0}
           </button>
           <div style="display: flex; gap: 8px;">
             ${(currentUser?.role === 'super_admin') ? `<button onclick="openDetails('${c._id}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--bg-muted); color: var(--text-main); border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;">Details</button>` : ''}
-            ${(currentUser?.role === 'super_admin') ? `<button onclick="sendReminder('${c.category}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: #f43f5e; color: white; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;"><i class="ph ph-bell"></i> Remind</button>` : ''}
+            ${(currentUser?.role === 'super_admin') ? `
+              <button onclick="sendReminder('${c._id}')" class="btn" 
+                ${(c.status !== 'Pending' || (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000)) ? 'disabled' : ''}
+                style="padding: 6px 12px; font-size: 0.8rem; background: ${(c.status !== 'Pending' || (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000)) ? 'var(--bg-body)' : '#f43f5e'}; color: ${(c.status !== 'Pending' || (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000)) ? 'var(--text-secondary)' : 'white'}; border-radius: 6px; border: ${(c.status !== 'Pending' || (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000)) ? '1px solid var(--border-color)' : 'none'}; cursor: ${(c.status !== 'Pending' || (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000)) ? 'not-allowed' : 'pointer'}; display: flex; align-items: center; gap: 4px;">
+                <i class="ph ph-bell${(c.status !== 'Pending' || (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000)) ? '-slash' : ''}"></i> 
+                ${c.status !== 'Pending' ? 'Action Taken' : (new Date() - new Date(c.createdAt) < 2 * 24 * 60 * 60 * 1000 ? 'Wait 2d' : 'Remind')}
+              </button>` : ''}
             ${(currentUser?.role?.startsWith('admin_')) ? `<button onclick="openAdminUpdateModal('${c._id}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--text-main); color: white; border-radius: 6px; border: none; cursor: pointer;">Action</button>` : ''}
           </div>
         </div>
@@ -242,12 +259,18 @@ function openDetails(id) {
   const footer = document.getElementById('modalFooter');
   document.getElementById('detailsId').textContent = `#${id.slice(-6).toUpperCase()}`;
   body.innerHTML = `
-    <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">${c.title}</h2>
-    ${c.image ? `<img src="${c.image}" style="width: 100%; border-radius: 12px; margin-bottom: 1rem;">` : ''}
-    <p style="margin-bottom: 1rem; line-height: 1.6;">${c.description}</p>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #f8fafc; padding: 1rem; border-radius: 12px;">
-      <div><strong>Location:</strong> ${c.location}</div>
-      <div><strong>Category:</strong> ${c.category}</div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <h2 style="font-size: 1.5rem; margin: 0; color: var(--text-main);">${c.title}</h2>
+      <span class="badge" style="background: ${c.status === 'Resolved' ? '#10b98120' : '#f59e0b20'}; color: ${c.status === 'Resolved' ? '#10b981' : '#f59e0b'}; border: 1px solid currentColor; display: flex; align-items: center; gap: 6px; padding: 6px 12px;">
+        <i class="ph-bold ${c.status === 'Resolved' ? 'ph-check-circle' : 'ph-clock'}"></i>
+        ${c.status === 'Resolved' ? 'Completed' : 'In Progress'}
+      </span>
+    </div>
+    ${c.image ? `<img src="${c.image}" style="width: 100%; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--border-color);">` : ''}
+    <p style="margin-bottom: 1.5rem; line-height: 1.6; color: var(--text-secondary);">${c.description}</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--bg-body); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); color: var(--text-main);">
+      <div><strong style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-bottom: 4px;">Location</strong> ${c.location}</div>
+      <div><strong style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-bottom: 4px;">Category</strong> ${c.category}</div>
       <div><strong>Status:</strong> ${c.status}</div>
       <div><strong>Priority:</strong> ${c.priority}</div>
     </div>

@@ -6,7 +6,8 @@ const {
     getMyComplaints,
     getComplaintById,
     getStats,
-    toggleUpvote
+    toggleUpvote,
+    sendRemind
 } = require('../controllers/complaintController');
 const { protect, optionalAuth } = require('../middleware/authMiddleware');
 
@@ -16,5 +17,6 @@ router.get('/stats', optionalAuth, getStats);
 router.get('/my', protect, getMyComplaints);
 router.get('/:id', optionalAuth, getComplaintById);
 router.patch('/:id/upvote', protect, toggleUpvote);
+router.patch('/:id/remind', protect, sendRemind);
 
 module.exports = router;

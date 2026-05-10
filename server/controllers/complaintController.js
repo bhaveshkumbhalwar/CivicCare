@@ -205,8 +205,34 @@ const getStats = async (req, res) => {
 };
 
 /**
- * PATCH /api/complaints/:id/status  (Admin only — in adminController)
- * Update complaint status — see adminController.js
+ * PATCH /api/complaints/:id/remind
+ * Send reminder for a complaint (Super Admin only)
  */
+const sendRemind = async (req, res) => {
+    try {
+        if (req.user.role !== 'super_admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized.' });
+        }
 
-module.exports = { createComplaint, getAllComplaints, getMyComplaints, getComplaintById, toggleUpvote, getStats };
+        const complaint = await Complaint.findById(req.params.id);
+        if (!complaint) return res.status(404).json({ success: false, message: 'Not found.' });
+
+        // 2-day cooldown (48h)
+        const now = new Date();
+        if (complaint.lastRemindedAt) {
+            const diff = now - new Date(complaint.lastRemindedAt);
+            if (diff < 2 * 24 * 60 * 60 * 1000) {
+                return res.status(400).json({ success: false, message: 'Cooldown active. Please wait 2 days.' });
+            }
+        }
+
+        complaint.lastRemindedAt = now;
+        await complaint.save();
+
+        res.json({ success: true, message: `Notification sent to ${complaint.category} department.` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+module.exports = { createComplaint, getAllComplaints, getMyComplaints, getComplaintById, toggleUpvote, getStats, sendRemind };
