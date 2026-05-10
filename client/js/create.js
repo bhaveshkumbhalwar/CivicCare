@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const description = document.getElementById('description').value;
         const image = document.getElementById('image').value;
 
-        errorAlert.classList.remove('show');
+        errorAlert.style.display = 'none';
         
         // Loading state
         submitBtn.disabled = true;
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             errorMessage.textContent = err.message || 'Failed to submit report. Please try again.';
-            errorAlert.classList.add('show');
+            errorAlert.style.display = 'flex';
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalHtml;

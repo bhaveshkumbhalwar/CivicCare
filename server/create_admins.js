@@ -18,6 +18,12 @@ const admins = [
     role: 'admin_government'
   },
   {
+    name: 'Municipal Admin',
+    email: 'municipal@admin.com',
+    password: 'admin123',
+    role: 'admin_municipality'
+  },
+  {
     name: 'System Super Admin',
     email: 'super@admin.com',
     password: 'admin123',

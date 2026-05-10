@@ -1,13 +1,6 @@
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
-
-const ROLE_CATEGORY_MAP = {
-    admin_colleges: 'Colleges',
-    admin_schools: 'Schools',
-    admin_societies: 'Societies',
-    admin_vendors: ['Local Vendors', 'Shopkeepers'],
-    admin_government: 'Government Services',
-};
+const { ROLE_CATEGORY_MAP } = require('../utils/constants');
 
 const updateComplaintStatus = async (req, res) => {
     try {
@@ -32,10 +25,13 @@ const updateComplaintStatus = async (req, res) => {
             }
         }
 
+        // Capture old status BEFORE mutating so resolvedAt check works
+        const oldStatus = complaint.status;
+
         if (status) complaint.status = status;
         if (adminNote !== undefined) complaint.adminNote = adminNote;
         
-        if (status === 'Resolved' && complaint.status !== 'Resolved') {
+        if (status === 'Resolved' && oldStatus !== 'Resolved') {
             complaint.resolvedAt = Date.now();
         }
 

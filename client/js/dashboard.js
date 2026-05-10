@@ -12,6 +12,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   auth.checkProtectedRoute();
   auth.setupNavbar();
   currentUser = auth.getUser();
+
+  // Hide "My Reports" tab and "File a Complaint" button for admin users
+  const isAdmin = currentUser?.role === 'super_admin' || currentUser?.role?.startsWith('admin_');
+  if (isAdmin) {
+    const viewToggle = document.getElementById('viewToggleContainer');
+    if (viewToggle) viewToggle.style.display = 'none';
+    const heroCreate = document.getElementById('heroCreateContainer');
+    if (heroCreate) heroCreate.style.display = 'none';
+  }
   
   await fetchComplaints();
   renderCategories();
@@ -90,6 +99,11 @@ async function fetchComplaints(append = false) {
   }
 }
 
+function sendReminder(category) {
+  showToast(`Reminder sent to the <b>${category}</b> Department!`, 'success');
+  // Logic for persistent notification can be added here
+}
+
 function renderDashboardUI(append = false) {
   updateDashboardStats();
   renderComplaints(append);
@@ -98,26 +112,32 @@ function renderDashboardUI(append = false) {
 async function updateDashboardStats() {
   try {
     const res = await api.get('/complaints/stats');
-    const stats = res.stats || { total: 0, Resolved: 0, Pending: 0 };
+    const stats = res.stats || {};
+    const total = stats.total || 0;
+    const resolved = stats.Resolved || 0;
     
     // Animate Hero Counters
-    animateValue("totalCountHero", 0, stats.total, 1200);
-    animateValue("resolvedCountHero", 0, stats.Resolved, 1500);
+    animateValue("totalCountHero", 0, total, 1200);
+    animateValue("resolvedCountHero", 0, resolved, 1500);
 
     const statsPanel = document.getElementById('statsPanel');
     if (statsPanel) {
       statsPanel.innerHTML = `
         <div class="stat-card">
           <div class="stat-info"><h3>Total Issues</h3><div class="value">${stats.total}</div></div>
-          <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i class="ph ph-map-pin"></i></div>
+          <div class="stat-icon icon-blue"><i class="ph ph-map-pin"></i></div>
         </div>
         <div class="stat-card">
           <div class="stat-info"><h3>Pending</h3><div class="value">${stats.Pending || 0}</div></div>
-          <div class="stat-icon" style="background: #fffbeb; color: #d97706;"><i class="ph ph-clock"></i></div>
+          <div class="stat-icon icon-amber"><i class="ph ph-clock"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info"><h3>In Progress</h3><div class="value">${stats['In Progress'] || 0}</div></div>
+          <div class="stat-icon icon-indigo"><i class="ph ph-spinner"></i></div>
         </div>
         <div class="stat-card">
           <div class="stat-info"><h3>Resolved</h3><div class="value">${stats.Resolved || 0}</div></div>
-          <div class="stat-icon" style="background: #ecfdf5; color: #059669;"><i class="ph ph-check-circle"></i></div>
+          <div class="stat-icon icon-emerald"><i class="ph ph-check-circle"></i></div>
         </div>
       `;
     }
@@ -125,14 +145,30 @@ async function updateDashboardStats() {
 }
 
 function renderCategories() {
-  const categories = [
+  let categories = [
     { name: 'Colleges', icon: 'ph-student', color: '#3b82f6' },
     { name: 'Schools', icon: 'ph-backpack', color: '#10b981' },
     { name: 'Societies', icon: 'ph-buildings', color: '#f59e0b' },
     { name: 'Local Vendors', icon: 'ph-storefront', color: '#ef4444' },
     { name: 'Shopkeepers', icon: 'ph-shopping-bag', color: '#8b5cf6' },
-    { name: 'Government Services', icon: 'ph-bank', color: '#6366f1' }
+    { name: 'Government Services', icon: 'ph-bank', color: '#6366f1' },
+    { name: 'Municipal Corporation', icon: 'ph-truck', color: '#f43f5e' }
   ];
+
+  // RBAC: Filter categories for department admins
+  if (currentUser?.role && currentUser.role.startsWith('admin_')) {
+    const roleMap = {
+      admin_colleges: ['Colleges'],
+      admin_schools: ['Schools'],
+      admin_societies: ['Societies'],
+      admin_vendors: ['Local Vendors', 'Shopkeepers'],
+      admin_government: ['Government Services'],
+      admin_municipality: ['Municipal Corporation']
+    };
+    const allowed = roleMap[currentUser.role] || [];
+    categories = categories.filter(cat => allowed.includes(cat.name));
+  }
+
   const grid = document.getElementById('categoryGrid');
   if (!grid) return;
   grid.innerHTML = categories.map(cat => `
@@ -163,18 +199,35 @@ function renderComplaints() {
     <article class="complaint-card animate-fade-up" style="animation-delay: ${(i%6)*0.1}s">
       <div class="card-body">
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-          <span class="badge" style="background: #f1f5f9; color: var(--text-secondary);">${c.category}</span>
+          <span class="badge" style="background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border-color);">${c.category}</span>
           <span class="badge priority-${c.priority.toLowerCase()}">${c.priority}</span>
         </div>
         <h3 class="card-title">${c.title}</h3>
         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; height: 3.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${c.description}</p>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
-          <button onclick="handleUpvote('${c._id}')" class="btn" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer;">
+        
+        ${(currentUser?.role === 'super_admin') ? `
+          <div style="margin: 12px 0; padding: 10px; background: var(--bg-body); border-radius: 10px; font-size: 0.8rem; color: var(--text-secondary); border: 1.5px dashed var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-calendar-blank"></i> Filed: <b>${new Date(c.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</b></span>
+              <span style="display: flex; align-items: center; gap: 6px; color: ${c.status === 'Pending' ? '#f43f5e' : '#10b981'};">
+                <i class="ph-bold ph-hourglass-high"></i> 
+                <b>${c.status === 'Pending' ? 'Awaiting Action' : (() => {
+                  const hours = Math.max(1, Math.round((new Date(c.updatedAt) - new Date(c.createdAt)) / 3600000));
+                  return hours > 24 ? `${Math.floor(hours/24)}d response` : `${hours}h response`;
+                })()}</b>
+              </span>
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <button onclick="handleUpvote('${c._id}')" class="btn" style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; color: var(--text-main);">
             <i class="ph ph-thumbs-up"></i> ${c.upvotes?.length || 0}
           </button>
           <div style="display: flex; gap: 8px;">
-            <button onclick="openDetails('${c._id}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: #e2e8f0; border-radius: 6px; border: none; cursor: pointer;">Details</button>
-            ${(currentUser?.role?.startsWith('admin_') || currentUser?.role === 'super_admin') ? `<button onclick="openAdminUpdateModal('${c._id}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--text-main); color: white; border-radius: 6px; border: none; cursor: pointer;">Action</button>` : ''}
+            ${(currentUser?.role === 'super_admin') ? `<button onclick="openDetails('${c._id}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--bg-muted); color: var(--text-main); border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;">Details</button>` : ''}
+            ${(currentUser?.role === 'super_admin') ? `<button onclick="sendReminder('${c.category}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: #f43f5e; color: white; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;"><i class="ph ph-bell"></i> Remind</button>` : ''}
+            ${(currentUser?.role?.startsWith('admin_')) ? `<button onclick="openAdminUpdateModal('${c._id}')" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--text-main); color: white; border-radius: 6px; border: none; cursor: pointer;">Action</button>` : ''}
           </div>
         </div>
       </div>
@@ -275,10 +328,17 @@ async function loadMore() {
 function animateValue(id, start, end, duration) {
   const obj = document.getElementById(id);
   if (!obj) return;
-  const range = end - start;
+  
+  if (start === end) {
+    obj.textContent = end;
+    return;
+  }
+
   let current = start;
   const increment = end > start ? 1 : -1;
-  const stepTime = Math.abs(Math.floor(duration / Math.max(range, 1))) || 50;
+  const range = Math.abs(end - start);
+  const stepTime = Math.max(Math.floor(duration / range), 10);
+  
   const timer = setInterval(function() {
     current += increment;
     obj.textContent = current;
@@ -287,6 +347,14 @@ function animateValue(id, start, end, duration) {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function openCreateModal() {
+  if (!auth.isAuthenticated()) {
+    window.location.href = '/login.html';
+    return;
+  }
+  document.getElementById('createModal').classList.add('show');
+}
 
 function showToast(msg, type = 'success') {
   const container = document.getElementById('toastContainer');
@@ -308,3 +376,4 @@ window.setView = setView;
 window.loadMore = loadMore;
 window.toggleCategoryFilter = toggleCategoryFilter;
 window.fetchComplaints = fetchComplaints;
+window.sendReminder = sendReminder;

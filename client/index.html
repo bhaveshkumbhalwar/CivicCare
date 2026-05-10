@@ -33,8 +33,8 @@
           <h1>Report. Track. <br>Resolve.</h1>
           <p>Join thousands of citizens making their community better. Your voice matters in building a cleaner, safer, and more efficient society.</p>
           <div style="margin-top: 2.5rem;" id="heroCreateContainer">
-            <button onclick="openCreateModal()" class="btn glass" style="color: white; padding: 14px 32px; font-weight: 700; border-radius: 14px; cursor: pointer; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; gap: 10px;">
-              <i class="ph-bold ph-plus"></i> File a Public Case
+            <button onclick="openCreateModal()" class="btn glass hero-cta-btn" id="heroCreateBtn">
+              <i class="ph-bold ph-plus"></i> File a Complaint
             </button>
           </div>
         </div>
@@ -68,20 +68,20 @@
           <input type="text" id="searchInput" class="input-glow" placeholder="Search reports...">
         </div>
         <div style="display: flex; gap: 12px;">
-          <select id="statusFilter" class="input-glow" style="padding: 10px 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 600;">
+          <select id="statusFilter" class="input-glow" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-weight: 600;">
             <option value="">All Status</option>
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
             <option value="Resolved">Resolved</option>
           </select>
-          <select id="sortBy" class="input-glow" style="padding: 10px 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 600;">
+          <select id="sortBy" class="input-glow" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-weight: 600;">
             <option value="recent">Most Recent</option>
             <option value="upvotes">Most Supported</option>
           </select>
         </div>
       </div>
 
-      <div style="display: flex; gap: 24px; border-bottom: 2px solid #e2e8f0; margin: 2rem 0; padding-bottom: 4px;" id="viewToggleContainer">
+      <div style="display: flex; gap: 24px; border-bottom: 2px solid var(--border-color); margin: 2rem 0; padding-bottom: 4px;" id="viewToggleContainer">
         <button onclick="setView('all')" class="view-tab active" id="viewAllBtn">Community Issues</button>
         <button onclick="setView('my')" class="view-tab" id="viewMyBtn">My Reports</button>
       </div>
@@ -118,43 +118,44 @@
 
   <!-- Create Modal -->
   <div id="createModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-content" style="max-width: 720px;">
       <div class="modal-header-blue">
         <div>
-          <h2>File a Complaint</h2>
-          <p style="font-size: 0.8rem; opacity: 0.8;">Help us improve your community</p>
+          <h2 style="font-size: 1.35rem; font-weight: 800;">File a Complaint</h2>
+          <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 4px;">Help us improve your community</p>
         </div>
         <button class="modal-close" onclick="closeModal('createModal')"><i class="ph ph-x"></i></button>
       </div>
-      <div class="modal-body">
-        <form id="createForm" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="modal-body" style="padding: 2rem 2.5rem;">
+        <form id="createForm" class="modal-form">
           <div class="form-group">
-            <label class="form-label">Title *</label>
-            <input type="text" id="cTitle" required placeholder="Issue title">
+            <label class="form-label"><i class="ph ph-text-aa"></i> Title *</label>
+            <input type="text" id="cTitle" class="form-input" required placeholder="e.g., Broken street light near college gate">
           </div>
           <div class="form-group">
-            <label class="form-label">Description *</label>
-            <textarea id="cDescription" required placeholder="Details..."></textarea>
+            <label class="form-label"><i class="ph ph-note-pencil"></i> Description *</label>
+            <textarea id="cDescription" class="form-input" required placeholder="Provide details about the issue, its impact, and any helpful context..." rows="4"></textarea>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Category *</label>
-              <select id="cCategory" required>
+              <label class="form-label"><i class="ph ph-tag"></i> Category *</label>
+              <select id="cCategory" class="form-input" required>
                 <option value="Colleges">Colleges</option>
                 <option value="Schools">Schools</option>
                 <option value="Societies">Societies</option>
                 <option value="Local Vendors">Local Vendors</option>
                 <option value="Shopkeepers">Shopkeepers</option>
                 <option value="Government Services">Government Services</option>
+                <option value="Municipal Corporation">Municipal Corporation</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Location *</label>
-              <input type="text" id="cLocation" required placeholder="Address">
+              <label class="form-label"><i class="ph ph-map-pin"></i> Location *</label>
+              <input type="text" id="cLocation" class="form-input" required placeholder="e.g., Sector 4, near Central Bank">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Priority</label>
+            <label class="form-label"><i class="ph ph-flag"></i> Priority</label>
             <div class="priority-selector">
               <div class="priority-option p-low" onclick="selectPriority('Low')">Low</div>
               <div class="priority-option p-medium selected" onclick="selectPriority('Medium')">Medium</div>
@@ -164,10 +165,13 @@
             <input type="hidden" id="cPriority" value="Medium">
           </div>
           <div class="form-group">
-             <label class="form-label">Image URL (Optional)</label>
-             <input type="text" id="cImage" placeholder="Paste image link">
+            <label class="form-label"><i class="ph ph-image"></i> Image URL (Optional)</label>
+            <input type="text" id="cImage" class="form-input" placeholder="https://example.com/photo.jpg">
           </div>
-          <button type="submit" class="btn btn-primary" id="cSubmitBtn" style="padding: 14px; font-weight: 700;">Submit Report</button>
+          <button type="submit" class="btn btn-submit" id="cSubmitBtn">
+            <span>Submit Complaint</span>
+            <i class="ph-bold ph-paper-plane-tilt"></i>
+          </button>
         </form>
       </div>
     </div>

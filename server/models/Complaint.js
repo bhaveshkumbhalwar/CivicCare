@@ -28,7 +28,7 @@ const complaintSchema = new mongoose.Schema(
         category: {
             type: String,
             required: [true, 'Category is required'],
-            enum: ['Colleges', 'Schools', 'Societies', 'Local Vendors', 'Shopkeepers', 'Government Services'],
+            enum: ['Colleges', 'Schools', 'Societies', 'Local Vendors', 'Shopkeepers', 'Government Services', 'Municipal Corporation'],
         },
         priority: {
             type: String,

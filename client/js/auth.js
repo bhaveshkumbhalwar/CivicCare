@@ -88,7 +88,7 @@ const auth = {
           <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #6366f1); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; border: 2px solid white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);">
             ${initial}
           </div>
-          <button onclick="auth.logout()" class="btn" style="padding: 8px 12px; font-size: 0.8rem; background: #f1f5f9; color: var(--text-main); border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+          <button onclick="auth.logout()" class="btn btn-logout">
             <i class="ph ph-sign-out"></i> Logout
           </button>
         </div>

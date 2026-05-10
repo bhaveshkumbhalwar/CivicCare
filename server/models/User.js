@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
                 'admin_societies', 
                 'admin_vendors', 
                 'admin_government', 
+                'admin_municipality', 
                 'super_admin'
             ],
             default: 'user',

@@ -1,4 +1,5 @@
 const Complaint = require('../models/Complaint');
+const { ROLE_CATEGORY_MAP } = require('../utils/constants');
 
 /**
  * POST /api/complaints
@@ -28,17 +29,6 @@ const createComplaint = async (req, res) => {
         }
         res.status(500).json({ success: false, message: 'Failed to submit complaint.' });
     }
-};
-
-/**
- * Mapping of Admin Roles to Categories
- */
-const ROLE_CATEGORY_MAP = {
-    admin_colleges: 'Colleges',
-    admin_schools: 'Schools',
-    admin_societies: 'Societies',
-    admin_vendors: ['Local Vendors', 'Shopkeepers'],
-    admin_government: 'Government Services',
 };
 
 /**
@@ -177,7 +167,17 @@ const toggleUpvote = async (req, res) => {
  */
 const getStats = async (req, res) => {
     try {
+        const query = {};
+        
+        // RBAC: Department admins only see their own stats
+        const userRole = req.user?.role;
+        if (userRole && ROLE_CATEGORY_MAP[userRole]) {
+            const allowed = ROLE_CATEGORY_MAP[userRole];
+            query.category = Array.isArray(allowed) ? { $in: allowed } : allowed;
+        }
+
         const stats = await Complaint.aggregate([
+            { $match: query },
             {
                 $group: {
                     _id: '$status',
